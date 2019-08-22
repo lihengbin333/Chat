@@ -103,8 +103,13 @@ class ChatWindow {
                                         client_pane = new JScrollPane(cls);
                                         client_pane.setBounds(50,50,100,275);
                                         client_pane.setBorder(clientBorder);
-                                        //sp.setViewportView(ls);
+                                        
                                         chat_panel.add(client_pane);
+                                        chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                                        chatFrame.add(chat_panel, BorderLayout.CENTER);
+                                        chatFrame.setSize(750, 500);
+                                        chatFrame.setLocationRelativeTo(null);
+                                        chatFrame.setVisible(true);
                                     }else {
                                         chatHistory.addElement(received);
                                         chat = new JList(chatHistory);
@@ -125,7 +130,6 @@ class ChatWindow {
                     sendMsg.start();
 
                     rcvdMsg.start();
-
 
                     chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     chatFrame.add(chat_panel, BorderLayout.CENTER);

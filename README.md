@@ -25,3 +25,11 @@ Enter name first
 ![alt text](https://github.com/lihengbin333/Chat/blob/master/img/client1.PNG)
 ![alt text](https://github.com/lihengbin333/Chat/blob/master/img/client2.PNG)
 ![alt text](https://github.com/lihengbin333/Chat/blob/master/img/client3.PNG)
+
+
+## Author
+```Bash
+Hengbin Li
+lihengbin123@gmail.com
+2019.08
+```

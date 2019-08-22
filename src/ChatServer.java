@@ -1,3 +1,12 @@
+/***************************************
+
+ Hengbin Li
+ Chat
+ --chat server
+ Creating server for chatting program allow
+ to accept multiple connections/users.
+
+****************************************/
 import java.io.*;
 import java.util.*;
 import java.net.*;
@@ -12,18 +21,22 @@ class ServerThread extends Thread{
         this.inputStream = inputStream;
         this.outputStream = outputStream;
     }
+    //send connected clients list to all connected clients
     public void sendClientList(){
         String cl = "";
         for(ServerThread st : clientList){
             if(st.socket.isConnected()){
                 cl = cl+st.name+";";
             }else{
+                //delete offline client
                 clientList.remove(st);
             }
         }
-        updateList(clientList);
+        //send updated clients list to all connected clients
         sendToAllClients("-UPDATED CLIENTSLIST:" +cl.substring(0,cl.length()-1));
     }
+
+    //send messages to all connected clients
     public void sendToAllClients(String msg){
         System.out.println(msg);
         for(ServerThread st : clientList){
@@ -38,26 +51,26 @@ class ServerThread extends Thread{
             }
 
         }
-        updateList(clientList);
+
     }
 
     public void run(){
         String received;
         try {
-
+            //receive first msg from user which is user's name
             name = inputStream.readUTF();
-
+            //notify all connected user new user is connected
             sendToAllClients(name+" join to chat!");
         }catch (Exception e){
             e.printStackTrace();
         }
-
+        //continuously receive messages from users
         while(true) {
             try {
 
-
                 received = inputStream.readUTF();
 
+                //disconnect user if it says "Quit"
                 if(received.equals("Quit")){
                     System.out.println(name+" quit!");
                     sendToAllClients(name+": "+received);
@@ -65,10 +78,12 @@ class ServerThread extends Thread{
                     sendClientList();
                     break;
                 }
+                //request to update clients list
                 if(received.contains("-UPDATE CLIENTSLIST")){
                     System.out.println("-UPDATE CLIENTSLIST");
                     sendClientList();
                 }else {
+                    //send users' messages to all users
                     sendToAllClients(name + ": " + received);
                 }
 
@@ -99,6 +114,7 @@ public class ChatServer {
     public static void main(String[] args) {
 
         try {
+            //initialization ServerSocket and socket for waiting user connection
             ServerSocket serverSocket = new ServerSocket(PORT);
             System.out.println("Server started");
             System.out.println("Waiting for connection ...");
@@ -107,14 +123,18 @@ public class ChatServer {
             DataInputStream inputStream = null;
             ArrayList<ServerThread> clientList = new ArrayList<ServerThread>();
             while (true) {
+
                 socket = serverSocket.accept();
                 System.out.println("Accepted");
                 outputStream = new DataOutputStream(socket.getOutputStream());
                 inputStream = new DataInputStream(socket.getInputStream());
                 ServerThread serverThread = new ServerThread(socket, inputStream, outputStream);
+
+                //add new user to clients list
                 clientList.add(serverThread);
                 serverThread.updateList(clientList);
                 serverThread.start();
+
             }
 
         } catch (Exception e) {

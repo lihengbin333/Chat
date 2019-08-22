@@ -1,3 +1,13 @@
+/***************************************
+
+ Hengbin Li
+ Chat
+ --client
+ Creating client windows for chatting program
+ allow multiple users to join one chatroom.
+
+ ****************************************/
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
@@ -6,6 +16,8 @@ import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+
+//Create chat windows for reading and writing messages
 class ChatWindow {
     JFrame loginframe, chatFrame;
     DataInputStream dataInputStream;
@@ -18,7 +30,10 @@ class ChatWindow {
         this.dataOutputStream = dataOutputStream;
         windows();
     }
+    
+    //create login window
     public void windows(){
+        
         loginframe = new JFrame("Login");
         loginframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         loginframe.add(loginPanel(),BorderLayout.CENTER);
@@ -48,8 +63,8 @@ class ChatWindow {
                     dataOutputStream.writeUTF(name);
                     loginframe.dispose();
                     chatFrame = new JFrame(name + "'s Chatroom");
-
-
+                    
+                    //create thread for sending messages
                     Thread sendMsg = new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -67,7 +82,7 @@ class ChatWindow {
                                     try {
                                         dataOutputStream.writeUTF(toSend);
                                         tf.setText("");
-                                        //System.out.println(toSend);
+
                                     }catch (Exception ex){
                                         ex.printStackTrace();
                                     }
@@ -76,7 +91,8 @@ class ChatWindow {
                         }
                     });
                     dataOutputStream.writeUTF("-UPDATE CLIENTSLIST");
-
+                    
+                    //thread for receiving messages
                     Thread rcvdMsg = new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -91,11 +107,14 @@ class ChatWindow {
                             while (true){
                                 try {
                                     String received = dataInputStream.readUTF();
+                                    
+                                    //if receive update clients list request, then update
+                                    //else show the message in main chatting field
                                     if(received.contains("-UPDATED CLIENTSLIST:")){
                                         String[] arr1 = received.split(":");
                                         String[] clientsList = arr1[1].split(";");
                                         DefaultListModel listModel = new DefaultListModel();
-                                        //System.out.println(clientsList[0]);
+
                                         for(String s : clientsList){
                                             listModel.addElement(s);
                                         }
@@ -103,7 +122,7 @@ class ChatWindow {
                                         client_pane = new JScrollPane(cls);
                                         client_pane.setBounds(50,50,100,275);
                                         client_pane.setBorder(clientBorder);
-                                        
+
                                         chat_panel.add(client_pane);
                                         chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                                         chatFrame.add(chat_panel, BorderLayout.CENTER);
@@ -124,18 +143,22 @@ class ChatWindow {
                                     e.printStackTrace();
                                 }
 
+
                             }
                         }
                     });
                     sendMsg.start();
 
                     rcvdMsg.start();
-
                     chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     chatFrame.add(chat_panel, BorderLayout.CENTER);
                     chatFrame.setSize(750, 500);
                     chatFrame.setLocationRelativeTo(null);
                     chatFrame.setVisible(true);
+
+
+
+
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }
@@ -147,6 +170,7 @@ class ChatWindow {
 
 }
 
+//client class, adding new client to server
 public class Client
 {
     private static final int PORT = 1234;
@@ -157,7 +181,6 @@ public class Client
         Socket socket = new Socket(ip,PORT);
         DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-
 
         ChatWindow chatWindow = new ChatWindow(dataOutputStream,dataInputStream);
 
